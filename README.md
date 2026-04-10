@@ -1,3 +1,4 @@
+emoji : ✅
 # 🚁 Fly-in — TODO List & Estimations
 
 ## ⏱️ Estimation globale : 4 à 7 jours de travail
@@ -7,12 +8,12 @@
 ## 📦 Étape 0 — Setup du projet
 **Durée estimée : ~1h**
 
-- [ ] Créer la structure des fichiers/dossiers
-- [ ] Créer le `Makefile` (rules : install, run, debug, clean, lint)
-- [ ] Créer le `requirements.txt` (ou `pyproject.toml`)
-- [ ] Créer le `.gitignore`
-- [ ] Créer le `README.md` (structure vide à remplir progressivement)
-- [ ] Initialiser le venv
+- [✅] Créer la structure des fichiers/dossiers
+- [✅] Créer le `Makefile` (rules : install, run, debug, clean, lint)
+- [✅] Créer le `requirements.txt` (ou `pyproject.toml`)
+- [✅] Créer le `.gitignore`
+- [✅] Créer le `README.md` (structure vide à remplir progressivement)
+- [✅] Initialiser le venv
 
 ---
 
