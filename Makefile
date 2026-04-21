@@ -9,7 +9,7 @@ debug:
 	$(PYTHON) -m pdb $(MAIN)
 
 install:
-    pip install -r requirements.txt
+	pip install -r requirements.txt
 
 lint:
 	flake8 . --exclude=venv,__pycache__,build,dist,*.egg-info
