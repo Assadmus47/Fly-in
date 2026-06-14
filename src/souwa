@@ -1,0 +1,6 @@
+# ceci est un commentaire
+nb_drones: 5
+
+start_hub: hub 0 0
+# autre commentaire
+hub: roof1 3 4
