@@ -13,7 +13,7 @@ install:
 
 lint:
 	flake8 . --exclude=venv,__pycache__,build,dist,*.egg-info
-	mypy . --exclude '(^|/)\venv(/|$$)'
+	mypy . --exclude '(^|/)\venv(/|$$)' --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 lint-strict:
 	flake8 . --exclude=venv,__pycache__,build,dist,*.egg-info
