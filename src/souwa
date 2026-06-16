@@ -1,6 +1,6 @@
 # ceci est un commentaire
 nb_drones: 5
 
-start_hub: hub sousou 0 [color=green]
+start_hub: hub 0 0 [color=green zone=restricted max_drones=2]
 # autre commentaire
 hub: roof1 3 4

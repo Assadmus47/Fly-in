@@ -36,6 +36,7 @@ def extract_start_hub(data: list[str]) -> Start_hub:
                     metadata["max_drones"] = int(elem[1])
                 elif elem[0] == "zone":
                     metadata["zone_type"] = elem[1]
+
         zone = Start_hub(
                 name=data[0],
                 x=int(data[1]),
