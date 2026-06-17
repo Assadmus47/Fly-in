@@ -21,3 +21,9 @@ class Hub(Zone):
 
 class End_hub(Zone):
     pass
+
+
+class Connection(BaseModel):
+    zone1: str = Field(...)
+    zone2: str = Field(...)
+    max_link_capacity: int = Field(default=1, gt=0)

@@ -1,5 +1,5 @@
 
-from models import Start_hub, Hub, End_hub, Zone
+from models import Start_hub, Hub, End_hub, Zone, Connection
 
 def read_file(filename: str) -> list[str]:
     try:
@@ -38,6 +38,21 @@ def extract_zone(info: str, zone_type: str) -> Zone:
         raise SystemExit("ERROR : Expected Integer Value")
 
 
+def extract_connection(data: str) -> Connection:
+    parts = data.strip().split()
+    zones = parts[0].split("-")
+    metadata = {}
+
+    if len(parts) > 1:
+        meta_parts = " ".join(parts[1:]).strip("[]").split()
+        for elem in meta_parts:
+            key, value = elem.split("=")
+            if key == "max_link_capacity":
+                metadata["max_link_capacity"] = int(value)
+
+    return Connection(zone1=zones[0], zone2=zones[1], **metadata)
+
+
 def clean_lines(lines: list[str]) -> list[str]:
     data: list[str] = []
     for line in lines:
@@ -50,6 +65,9 @@ def clean_lines(lines: list[str]) -> list[str]:
 def parse_file(filename: str) -> None:
     data = clean_lines(read_file(filename))
     temp = data[0].split(":")
+    zones = {}
+    connections = []
+
     if temp[0] != "nb_drones":
         raise SystemExit(
             f"ERROR line 1: expected 'nb_drones: <number>', got '{temp[0]}'"
@@ -68,12 +86,15 @@ def parse_file(filename: str) -> None:
         elem = elem.split(":")
         if elem[0] == "start_hub":
             zone = extract_zone(elem[1], "Start_hub")
+            zones[zone.name] = zone
         elif elem[0] == "hub":
             zone = extract_zone(elem[1], "Hub")
+            zones[zone.name] = zone
         elif elem[0] == "end_hub":
             zone = extract_zone(elem[1], "End_hub")
+            zones[zone.name] = zone
         elif elem[0] == "connection":
-            pass
+            connections.append(extract_connection(elem[1]))
 
 
 if __name__ == "__main__":
