@@ -62,11 +62,36 @@ def clean_lines(lines: list[str]) -> list[str]:
         data.append(line)
     return data
 
-def parse_file(filename: str) -> None:
+
+def duplicates_checker(zones: dict) -> None:
+    start_hubs = [z for z in zones.values() if isinstance(z, Start_hub)]
+    end_hubs = [z for z in zones.values() if isinstance(z, End_hub)]
+
+    if len(start_hubs) != 1:
+        raise SystemExit(
+            f"ERROR: there must be exactly one 'start_hub', found {len(start_hubs)}"
+            )
+    
+    if len(end_hubs) != 1:
+        raise SystemExit(
+            f"ERROR: there must be exactly one 'end_hub', found {len(end_hubs)}"
+        )
+
+
+def validate_connections(zones: dict[str, Zone], connections: list[Connection]) -> None:
+    for conn in connections:
+        if conn.zone1 not in zones:
+            raise SystemExit(f"ERROR: zone '{conn.zone1}' in connection does not exist")
+        if conn.zone2 not in zones:
+            raise SystemExit(f"ERROR: zone '{conn.zone2}' in connection does not exist")
+
+
+def parse_file(filename: str) -> tuple[int, dict[str, Zone], list[Connection]]:
     data = clean_lines(read_file(filename))
     temp = data[0].split(":")
     zones = {}
     connections = []
+    nb_drones = 0
 
     if temp[0] != "nb_drones":
         raise SystemExit(
@@ -86,15 +111,32 @@ def parse_file(filename: str) -> None:
         elem = elem.split(":")
         if elem[0] == "start_hub":
             zone = extract_zone(elem[1], "Start_hub")
+            if zone.name in zones:
+                raise SystemExit(f"ERROR: zone '{zone.name}' already exists")    
             zones[zone.name] = zone
+        
         elif elem[0] == "hub":
             zone = extract_zone(elem[1], "Hub")
+            if zone.name in zones:
+                raise SystemExit(f"ERROR: zone '{zone.name}' already exists")    
             zones[zone.name] = zone
+        
         elif elem[0] == "end_hub":
             zone = extract_zone(elem[1], "End_hub")
+            if zone.name in zones:
+                raise SystemExit(f"ERROR: zone '{zone.name}' already exists")    
             zones[zone.name] = zone
+        
         elif elem[0] == "connection":
             connections.append(extract_connection(elem[1]))
+
+        else:
+            raise SystemExit(f"ERROR: unknown line type '{elem[0]}'")
+
+        duplicates_checker(zones)
+        validate_connections(zones, connections)
+
+    return nb_drones, zones, connections
 
 
 if __name__ == "__main__":
