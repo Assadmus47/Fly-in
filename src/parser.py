@@ -1,16 +1,5 @@
 
-from pydantic import BaseModel,Field
-from typing import Optional, List, Literal
-
-
-class Start_hub(BaseModel):
-    name: str = Field(...)
-    x: int = Field(...)
-    y: int = Field(...)
-    color: Optional[str] = None
-    max_drones: int = Field(default=1, gt=0)
-    zone_type: Literal["normal", "blocked", "restricted", "priority"] = "normal"
-
+from models import Start_hub, Hub, End_hub, Zone
 
 def read_file(filename: str) -> list[str]:
     try:
@@ -21,13 +10,12 @@ def read_file(filename: str) -> list[str]:
         return []
 
 
-def extract_start_hub(data: list[str]) -> Start_hub:
+def extract_zone(info: str, zone_type: str) -> Zone:
     try:
         metadata = {}
-        data = data.split()
-
-        if len(data) == 4:
-            meta_parts = data[3].strip("[]").split()
+        data = info.split()
+        if len(data) > 3:
+            meta_parts = " ".join(data[3:]).strip("[]").split()
             for elem in meta_parts:
                 elem = elem.split("=")
                 if elem[0] == "color":
@@ -37,13 +25,14 @@ def extract_start_hub(data: list[str]) -> Start_hub:
                 elif elem[0] == "zone":
                     metadata["zone_type"] = elem[1]
 
-        zone = Start_hub(
-                name=data[0],
-                x=int(data[1]),
-                y=int(data[2]),
-                **metadata
-            )
-        print(zone)
+        if zone_type == "Start_hub":
+            zone = Start_hub(name=data[0], x=int(data[1]), y=int(data[2]), **metadata)
+        elif zone_type == "Hub":
+            zone = Hub(name=data[0], x=int(data[1]), y=int(data[2]), **metadata)
+        elif zone_type == "End_hub":
+            zone = End_hub(name=data[0], x=int(data[1]), y=int(data[2]), **metadata)
+
+        return zone
 
     except ValueError:
         raise SystemExit("ERROR : Expected Integer Value")
@@ -78,11 +67,11 @@ def parse_file(filename: str) -> None:
     for elem in data[1:]:
         elem = elem.split(":")
         if elem[0] == "start_hub":
-            extract_start_hub(elem[1])
+            zone = extract_zone(elem[1], "Start_hub")
         elif elem[0] == "hub":
-            pass
+            zone = extract_zone(elem[1], "Hub")
         elif elem[0] == "end_hub":
-            pass
+            zone = extract_zone(elem[1], "End_hub")
         elif elem[0] == "connection":
             pass
 
