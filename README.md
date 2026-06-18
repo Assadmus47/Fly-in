@@ -20,13 +20,13 @@ emoji : ✅
 ## 📂 Étape 1 — Le Parser
 **Durée estimée : ~4h**
 
-- [] Lire et parser la ligne `nb_drones`
-- [] Parser les zones `start_hub`, `end_hub`, `hub` avec coordonnées et metadata
+- [✅] Lire et parser la ligne `nb_drones`
+- [✅] Parser les zones `start_hub`, `end_hub`, `hub` avec coordonnées et metadata
 - [] Parser les connexions `connection: zone1-zone2 [metadata]`
-- [] Gérer les commentaires (`#`)
-- [ ] Valider le format : unicité des noms, types valides, valeurs positives
-- [ ] Gérer les erreurs de parsing avec messages clairs (ligne + cause)
-- [ ] Tests manuels sur le fichier d'exemple + créer ses propres fichiers de test
+- [✅] Gérer les commentaires (`#`)
+- [✅] Valider le format : unicité des noms, types valides, valeurs positives
+- [✅] Gérer les erreurs de parsing avec messages clairs (ligne + cause)
+- [] Tests manuels sur le fichier d'exemple + créer ses propres fichiers de test
 
 ---
 

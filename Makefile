@@ -12,12 +12,12 @@ install:
 	pip install -r requirements.txt
 
 lint:
-	flake8 . --exclude=venv,__pycache__,build,dist,*.egg-info
-	mypy . --exclude '(^|/)\venv(/|$$)' --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	flake8 . --exclude=venv,.venv,__pycache__,build,dist,*.egg-info
+	mypy . --exclude '(^|/)\.?venv(/|$$)' --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 lint-strict:
-	flake8 . --exclude=venv,__pycache__,build,dist,*.egg-info
-	mypy . --exclude '(^|/)\venv(/|$$)' --strict
+	flake8 . --exclude=venv,.venv,__pycache__,build,dist,*.egg-info
+	mypy . --exclude '(^|/)\.?venv(/|$$)' --strict
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
