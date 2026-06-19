@@ -168,4 +168,5 @@ def parse_file(
 
 
 if __name__ == "__main__":
-    print(parse_file("config.txt"))
+    result = parse_file("config.txt")
+    print(result[2])
