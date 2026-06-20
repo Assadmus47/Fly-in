@@ -54,3 +54,17 @@ class Connection(BaseModel):
     zone1: str = Field(...)
     zone2: str = Field(...)
     max_link_capacity: int = Field(default=1, gt=0)
+
+
+class Drone(BaseModel):
+    """Represents a drone navigating through the zone network.
+
+    Attributes:
+        id: Unique positive identifier for the drone.
+        current_position: Name of the zone the drone currently occupies.
+        path: Ordered list of zone names the drone must follow.
+    """
+
+    id: int = Field(..., gt=0)
+    current_position: str = Field(...)
+    path: list[str] = Field(...)
