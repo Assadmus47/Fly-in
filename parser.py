@@ -1,5 +1,6 @@
 from models import Start_hub, Hub, End_hub, Zone, Connection
 from typing import Any
+from pydantic import ValidationError
 
 
 def read_file(filename: str) -> list[str]:
@@ -26,17 +27,22 @@ def extract_zone(info: str, zone_type: str) -> Zone:
                     metadata["zone_type"] = parts[1]
 
         zone: Zone
-        if zone_type == "Start_hub":
-            zone = Start_hub(
-                name=data[0], x=int(data[1]), y=int(data[2]), **metadata
-            )
-        elif zone_type == "Hub":
-            zone = Hub(
-                name=data[0], x=int(data[1]), y=int(data[2]), **metadata
-            )
-        else:
-            zone = End_hub(
-                name=data[0], x=int(data[1]), y=int(data[2]), **metadata
+        try:
+            if zone_type == "Start_hub":
+                zone = Start_hub(
+                    name=data[0], x=int(data[1]), y=int(data[2]), **metadata
+                )
+            elif zone_type == "Hub":
+                zone = Hub(
+                    name=data[0], x=int(data[1]), y=int(data[2]), **metadata
+                )
+            else:
+                zone = End_hub(
+                    name=data[0], x=int(data[1]), y=int(data[2]), **metadata
+                )
+        except ValidationError:
+            raise SystemExit(
+                f"ERROR: invalid zone metadata for '{data[0]}'"
             )
 
         return zone
