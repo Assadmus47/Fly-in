@@ -7,8 +7,7 @@ def read_file(filename: str) -> list[str]:
         with open(filename, "r") as f:
             return f.readlines()
     except FileNotFoundError:
-        print("ERROR: File Not Found.")
-        return []
+        raise SystemExit("ERROR: File Not Found.")
 
 
 def extract_zone(info: str, zone_type: str) -> Zone:
@@ -169,4 +168,4 @@ def parse_file(
 
 if __name__ == "__main__":
     result = parse_file("config.txt")
-    print(result[2])
+    print(result[1])

@@ -1,156 +1,167 @@
-emoji : ✅
-# 🚁 Fly-in — TODO List & Estimations
+*This project has been created as part of the 42 curriculum by mkacemi.*
 
-## ⏱️ Estimation globale : 4 à 7 jours de travail
+# Fly-in
 
----
+## Description
 
-## 📦 Étape 0 — Setup du projet
-**Durée estimée : ~1h**
+Fly-in is a drone routing simulation system written in Python. The project
+models a network of zones connected by links, and computes the most
+efficient way to route a fleet of drones from a starting zone (`start_hub`)
+to a destination zone (`end_hub`), while respecting movement constraints,
+zone occupancy limits, and connection capacity limits.
 
-- [✅] Créer la structure des fichiers/dossiers
-- [✅] Créer le `Makefile` (rules : install, run, debug, clean, lint)
-- [✅] Créer le `requirements.txt` (ou `pyproject.toml`)
-- [✅] Créer le `.gitignore`
-- [✅] Créer le `README.md` (structure vide à remplir progressivement)
-- [✅] Initialiser le venv
+The simulation proceeds in discrete turns. At each turn, every drone can
+move to an adjacent zone (if capacity allows), stay in place, or be in
+transit toward a `restricted` zone (which takes two turns to reach). The
+goal is to deliver all drones to the end zone in the fewest possible turns
+while respecting every constraint defined in the zone network.
 
----
+## Instructions
 
-## 📂 Étape 1 — Le Parser
-**Durée estimée : ~4h**
+### Requirements
 
-- [✅] Lire et parser la ligne `nb_drones`
-- [✅] Parser les zones `start_hub`, `end_hub`, `hub` avec coordonnées et metadata
-- [] Parser les connexions `connection: zone1-zone2 [metadata]`
-- [✅] Gérer les commentaires (`#`)
-- [✅] Valider le format : unicité des noms, types valides, valeurs positives
-- [✅] Gérer les erreurs de parsing avec messages clairs (ligne + cause)
-- [] Tests manuels sur le fichier d'exemple + créer ses propres fichiers de test
+- Python 3.10 or later
+- A virtual environment is recommended (`venv`)
 
----
+### Installation
 
-## 🏗️ Étape 2 — Les structures de données (Graph OOP)
-**Durée estimée : ~3h**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+make install
+```
 
-- [ ] Classe `Zone` (nom, coords, type, couleur, max_drones, drones actuels)
-- [ ] Classe `Connection` (zone1, zone2, max_link_capacity)
-- [ ] Classe `Graph` (zones, connexions, méthodes de navigation)
-  - [ ] Méthode : récupérer les voisins d'une zone
-  - [ ] Méthode : vérifier si une zone est accessible (pas blocked, capacité dispo)
-- [ ] Classe `Drone` (id, zone actuelle, état, chemin prévu)
-- [ ] **Contrainte importante** : aucune lib graph externe (pas de networkx, graphlib, etc.)
+### Running the simulation
 
----
+```bash
+make run
+```
 
-## 🔍 Étape 3 — L'algorithme de pathfinding
-**Durée estimée : ~5h**
+This executes `python3 main.py config.txt`, using the provided `config.txt`
+map file. To run a different map, edit the `Makefile`'s `run` rule or call
+the script directly:
 
-- [ ] Implémenter un BFS/Dijkstra "from scratch" pour trouver le chemin le plus court
-  - [ ] Prendre en compte les coûts par type de zone (normal=1, restricted=2, priority=1)
-  - [ ] Ignorer les zones `blocked`
-  - [ ] Préférer les zones `priority`
-- [ ] Trouver plusieurs chemins disjoints (pour distribuer les drones)
-- [ ] Gérer l'attribution des chemins aux drones (quel drone prend quel chemin)
+```bash
+python3 main.py <path_to_map_file>
+```
 
----
+### Debugging
 
-## ⚙️ Étape 4 — Le moteur de simulation (turn-by-turn)
-**Durée estimée : ~6h**  ← partie la plus complexe
+```bash
+make debug
+```
 
-- [ ] Logique de simulation tour par tour
-- [ ] Chaque drone peut : avancer, attendre, ou entrer sur une connexion vers une zone restricted
-- [ ] Appliquer les règles de capacité des zones (`max_drones`)
-- [ ] Appliquer les règles de capacité des connexions (`max_link_capacity`)
-- [ ] Gérer les zones restricted (2 tours, le drone doit OBLIGATOIREMENT arriver le tour suivant)
-- [ ] Gérer les conflits (deux drones veulent la même zone)
-- [ ] Drones qui quittent une zone libèrent la capacité pour le même tour
-- [ ] Simulation se termine quand tous les drones sont arrivés à `end_hub`
+### Linting
 
----
+```bash
+make lint
+make lint-strict
+```
 
-## 📤 Étape 5 — Output de la simulation
-**Durée estimée : ~1h**
+### Cleaning
 
-- [ ] Afficher chaque tour sur une ligne
-- [ ] Format : `D1-zone D2-zone ...`
-- [ ] Pour les drones sur connexion vers restricted : `D1-connexion`
-- [ ] Ne pas afficher les drones qui n'ont pas bougé
-- [ ] Ne plus afficher les drones déjà arrivés
+```bash
+make clean
+```
 
----
+## Project structure
 
-## 🎨 Étape 6 — Représentation visuelle
-**Durée estimée : ~3h**
+- `parser.py` — Parses the map configuration file into zones, connections,
+  and the number of drones, with full validation and error handling.
+- `models.py` — Pydantic data models: `Zone` (with subclasses `Start_hub`,
+  `Hub`, `End_hub`), `Connection`, and `Drone`.
+- `graph.py` — `Graph` class building an adjacency representation of the
+  zone network from parsed zones and connections.
+- `dijkstra.py` — `Dijkstra` class implementing a custom shortest-path
+  algorithm (no external graph library used, per project constraints).
+- `simulation.py` — `Simulation` class running the turn-by-turn movement
+  of all drones, enforcing zone occupancy, connection capacity, and
+  restricted-zone multi-turn movement rules.
+- `display.py` — `Display` class providing ANSI-colored terminal output
+  of the simulation, based on each zone's configured color.
+- `main.py` — Entry point wiring the parser, graph, pathfinding,
+  simulation, and display together.
 
-- [ ] Affichage coloré dans le terminal (avec `colorama` ou codes ANSI)
-  - [ ] Couleurs des zones selon leur type
-  - [ ] Positions des drones visibles
-- [ ] (Optionnel bonus) Interface graphique avec `matplotlib` ou `pygame`
+## Algorithm choices and implementation strategy
 
----
+### Pathfinding
 
-## 📊 Étape 7 — Optimisation de l'algorithme
-**Durée estimée : ~3h**
+Dijkstra's algorithm was implemented from scratch using Python's built-in
+`heapq` module as a priority queue, since external graph libraries
+(e.g. `networkx`) are forbidden by the project constraints. The algorithm
+computes the lowest-cost path between the start and end zones, where the
+cost of entering a zone depends on its type:
 
-- [ ] Vérifier les performances sur les cartes easy (≤ 6-8 turns)
-- [ ] Vérifier les performances sur les cartes medium (≤ 12-20 turns)
-- [ ] Vérifier les performances sur les cartes hard (≤ 35-60 turns)
-- [ ] Améliorer la distribution des drones sur les chemins
-- [ ] Gérer les deadlocks (drones bloqués mutuellement)
+- `normal`: 1 turn
+- `priority`: 1 turn
+- `restricted`: 2 turns
+- `blocked`: zones are excluded entirely from the graph traversal
 
----
+The algorithm maintains a `distances` dictionary (best known cost to reach
+each zone) and a `previous` dictionary (used to reconstruct the final path
+once the destination is reached), giving Dijkstra's standard
+`O((V + E) log V)` complexity using a binary heap.
 
-## 🧪 Étape 8 — Tests & robustesse
-**Durée estimée : ~2h**
+### Simulation
 
-- [ ] Créer ses propres fichiers de cartes pour les edge cases
-  - [ ] Carte avec zone blocked
-  - [ ] Carte avec zone restricted
-  - [ ] Carte avec max_link_capacity
-  - [ ] Carte sans chemin possible
-  - [ ] Fichier mal formé (parsing errors)
-- [ ] Tests avec pytest ou unittest
+All drones currently follow the same single path returned by Dijkstra.
+Each turn, the simulation engine attempts to advance every drone that is
+not currently "in flight":
 
----
+- **Normal/priority zones**: the drone moves into the next zone
+  immediately if the destination zone and the connection both have
+  available capacity.
+- **Restricted zones**: the drone "departs" on the current turn (freeing
+  its previous zone and reserving its destination slot immediately, to
+  prevent another drone from claiming the same slot mid-transit), and is
+  tracked in an `in_flight` registry until it lands on the following turn.
+  This matches the project's two-turn, no-early-arrival, no-extra-wait
+  rule for restricted zones.
 
-## 📝 Étape 9 — Finalisation
-**Durée estimée : ~2h**
+Zone and connection occupancy are tracked with dictionaries updated
+incrementally as drones move, which keeps each turn's complexity
+proportional to the number of active drones rather than the size of the
+whole network.
 
-- [ ] Compléter le `README.md`
-  - [ ] Description du projet
-  - [ ] Instructions d'installation/exécution
-  - [ ] Description de l'algorithme choisi
-  - [ ] Documentation de la représentation visuelle
-  - [ ] Ressources + comment l'IA a été utilisée
-- [ ] Vérifier que `flake8` et `mypy` passent sans erreurs
-- [ ] Vérifier que le `Makefile` fonctionne correctement
-- [ ] Relecture du code + docstrings
+### Output format
 
----
+Each simulation turn produces one line of space-separated `D<id>-<zone>`
+(or `D<id>-<zone1>-<zone2>` while a drone is in transit toward a
+restricted zone) entries, matching the format specified in the subject.
 
-## 🏆 Bonus (optionnel, après le mandatory)
-**Durée estimée : +2h si tu y vas**
+## Visual representation
 
-- [ ] Atteindre exactement les benchmarks de performance pour toutes les cartes
-- [ ] Résoudre la carte "The Impossible Dream" (25 drones) en < 45 tours
+The `Display` class wraps each zone name in ANSI escape codes matching the
+zone's configured `color` attribute from the map file (e.g. `color=red`
+renders that zone's name in red in the terminal). This provides immediate
+visual feedback on which zones drones are moving through during the
+simulation, directly in the terminal, without requiring any external
+graphics library.
 
----
+## Resources
 
-## 🗓️ Planning suggéré
+- [Dijkstra's algorithm — Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [Python `heapq` documentation](https://docs.python.org/3/library/heapq.html)
+- [Pydantic documentation](https://docs.pydantic.dev/)
+- [ANSI escape code reference](https://en.wikipedia.org/wiki/ANSI_escape_code)
+- [PEP 257 — Docstring Conventions](https://peps.python.org/pep-0257/)
 
-| Jour | Étapes |
-|------|--------|
-| Jour 1 | Setup (0) + Parser (1) |
-| Jour 2 | Structures de données (2) + début Pathfinding (3) |
-| Jour 3 | Fin Pathfinding (3) + début Simulation (4) |
-| Jour 4 | Fin Simulation (4) + Output (5) |
-| Jour 5 | Visuel (6) + Tests (8) |
-| Jour 6 | Optimisation (7) + Finalisation (9) |
-| Jour 7 | Buffer (corrections, bonus, relecture) |
+### AI usage
 
----
+Claude (Anthropic) was used throughout this project as a learning and
+debugging aid, primarily through guided, step-by-step explanations rather
+than direct code generation:
 
-> 💡 **Clé du projet** : La partie la plus difficile est l'étape 4 (moteur de simulation).
-> Le pathfinding seul c'est connu (BFS/Dijkstra), mais coordonner plusieurs drones
-> simultanément avec toutes les contraintes de capacité, c'est là que ça se complique.
+- Explaining core concepts (Dijkstra's algorithm, priority queues, Pydantic
+  validation, OOP design) before any code was written, often with manual
+  traced examples.
+- Reviewing code written by the author and pointing out bugs (e.g.
+  incorrect distance calculations, missing capacity checks, type errors
+  surfaced by mypy) without rewriting the logic outright.
+- Assisting in drafting this README based on the project's actual,
+  already-implemented architecture.
+
+All core logic (the parser, the graph, Dijkstra's algorithm, the
+simulation engine, and the display) was written and understood by the
+author, with AI used as a tutor and code reviewer rather than as a
+replacement for the author's own implementation work.
