@@ -50,23 +50,3 @@ class Display:
             new_output.append(f"{drone}-{colored}")
 
         return new_output
-
-
-if __name__ == "__main__":
-    from parser import parse_file
-    from dijkstra import Dijkstra
-    from simulation import Simulation
-
-    nb_drones, zones, connections = parse_file("config.txt")
-    graph = Graph(zones, connections)
-    dijkstra = Dijkstra(graph)
-    path = dijkstra.find_path("hub", "goal")
-
-    sim = Simulation(graph, nb_drones, path)
-    sim.run()
-
-    display = Display()
-    for turn in sim.output:
-        turn_list = turn.split()
-        colored_turn = display.format_turn(turn_list, graph)
-        print(" ".join(colored_turn))

@@ -208,18 +208,3 @@ class Simulation:
                     delivered.add(drone.id)
 
             self.output.append(" ".join(turn_moves))
-
-
-if __name__ == "__main__":
-    from parser import parse_file
-    from dijkstra import Dijkstra
-
-    nb_drones, zones, connections = parse_file("config.txt")
-    graph = Graph(zones, connections)
-    dijkstra = Dijkstra(graph)
-    path = dijkstra.find_path("hub", "goal")
-
-    sim = Simulation(graph, nb_drones, path)
-    sim.run()
-    for line in sim.output:
-        print(line)

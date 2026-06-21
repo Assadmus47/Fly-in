@@ -61,13 +61,3 @@ class Dijkstra:
         path.reverse()
 
         return path
-
-
-if __name__ == "__main__":
-    from parser import parse_file
-
-    nb_drones, zones, connections = parse_file("config.txt")
-    graph = Graph(zones, connections)
-    dijkstra = Dijkstra(graph)
-    path = dijkstra.find_path("hub", "goal")
-    print(path)

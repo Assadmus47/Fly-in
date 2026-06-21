@@ -170,8 +170,3 @@ def parse_file(
     validate_connections(zones, connections)
 
     return nb_drones, zones, connections
-
-
-if __name__ == "__main__":
-    result = parse_file("config.txt")
-    print(result[1])
