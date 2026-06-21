@@ -30,11 +30,16 @@ class Simulation:
         self.graph = graph
         self.path = path
         self.zone_occupancy: dict[str, int] = {}
-        self.connection_occupancy: dict[tuple[str, ...], int] = {}
         self.drone_progress: dict[int, int] = {}
         self.nb_drones: int = nb_drones
         self.output: list[str] = []
         self.drones: list[Drone] = []
+        self.in_flight: dict[int, tuple[str, int]] = {}
+
+        self.connection_occupancy: dict[tuple[str, ...], int] = {}
+        for conn in self.graph.connections:
+            key = tuple(sorted([conn.zone1, conn.zone2]))
+            self.connection_occupancy[key] = 0
 
         for i in range(1, nb_drones + 1):
             self.drones.append(
@@ -127,19 +132,28 @@ class Simulation:
         if not next_zone:
             return False
 
+        next_zone_type = self.graph.zones[next_zone].zone_type
         can_enter = self.can_enter_zone(next_zone)
         can_use = self.can_use_connection(drone.current_position, next_zone)
         if not can_enter or not can_use:
             return False
 
-        key = tuple(sorted([drone.current_position, next_zone]))
-        self.connection_occupancy[key] += 1
+        if next_zone_type == "restricted":
+            self.zone_occupancy[drone.current_position] -= 1
+            self.zone_occupancy[next_zone] += 1
+            self.in_flight[drone.id] = (next_zone, 1)
+            key = tuple(sorted([drone.current_position, next_zone]))
+            self.connection_occupancy[key] += 1
 
-        index = self.drone_progress[drone.id]
-        self.drone_progress[drone.id] += 1
-        self.zone_occupancy[self.path[index]] -= 1
-        self.zone_occupancy[next_zone] += 1
-        drone.current_position = next_zone
+        else:
+            key = tuple(sorted([drone.current_position, next_zone]))
+            self.connection_occupancy[key] += 1
+
+            index = self.drone_progress[drone.id]
+            self.drone_progress[drone.id] += 1
+            self.zone_occupancy[self.path[index]] -= 1
+            self.zone_occupancy[next_zone] += 1
+            drone.current_position = next_zone
 
         return True
 
@@ -154,11 +168,39 @@ class Simulation:
                 key: 0 for key in self.connection_occupancy
             }
 
+            active_this_turn: set[int] = set()
+            for drone_id, (destination, turns_left) in (
+                list(self.in_flight.items())
+            ):
+                turns_left -= 1
+                if turns_left == 0:
+                    active_this_turn.add(drone_id)
+                    for drone in self.drones:
+                        if drone.id == drone_id:
+                            drone.current_position = destination
+                            break
+                    self.drone_progress[drone_id] += 1
+                    del self.in_flight[drone_id]
+                    turn_moves.append(f"D{drone_id}-{destination}")
+                else:
+                    active_this_turn.add(drone_id)
+                    self.in_flight[drone_id] = (destination, turns_left)
+
             for drone in self.drones:
+                if drone.id in active_this_turn:
+                    continue
                 if self.move_drone(drone):
-                    turn_moves.append(
-                        f"D{drone.id}-{drone.current_position}"
-                    )
+                    if drone.id in self.in_flight:
+                        destination = self.in_flight[drone.id][0]
+                        turn_moves.append(
+                            f"D{drone.id}-{drone.current_position}"
+                            f"-{destination}"
+                        )
+                    else:
+                        turn_moves.append(
+                            f"D{drone.id}-{drone.current_position}"
+                        )
+
                 index = self.drone_progress[drone.id]
                 is_last = index == len(self.path) - 1
                 if is_last and drone.id not in delivered:
