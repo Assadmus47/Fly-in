@@ -27,7 +27,6 @@ def find_start_end(zones: dict[str, Zone]) -> tuple[str, str]:
 
 
 def main() -> None:
-    """Entry point — parse, simulate, and display the drone routing."""
     if len(sys.argv) < 2:
         raise SystemExit("ERROR: usage: python3 main.py <config_file>")
 
@@ -46,8 +45,12 @@ def main() -> None:
     for i, turn in enumerate(sim.output):
         moves = turn.split()
         display.print_turn(i + 1, moves, graph, end_zone)
-
     display.print_summary(len(sim.output), nb_drones)
+
+    for turn in sim.output:
+        print(turn)
+
+    print()
 
 
 if __name__ == "__main__":
