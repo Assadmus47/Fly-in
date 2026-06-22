@@ -138,6 +138,35 @@ visual feedback on which zones drones are moving through during the
 simulation, directly in the terminal, without requiring any external
 graphics library.
 
+## Example
+
+**Input (`config.txt`):**
+```
+nb_drones: 3
+start_hub: hub 0 0 [color=green]
+end_hub: goal 10 10 [color=yellow]
+hub: roof1 3 4 [zone=restricted color=red]
+connection: hub-roof1
+connection: roof1-goal
+```
+
+**Output:**
+```
+D1-hub-roof1
+D1-roof1
+D1-goal D2-hub-roof1
+D2-roof1
+D2-goal D3-hub-roof1
+D3-roof1
+D3-goal
+```
+
+Each line represents one simulation turn. Each entry follows the format:
+- `D<ID>-<zone>` — the drone arrived at this zone this turn
+- `D<ID>-<zone1>-<zone2>` — the drone is in transit toward a restricted zone (2-turn movement)
+- Drones that did not move are omitted from the line
+- Drones that reached the end zone are considered delivered and no longer appear
+
 ## Resources
 
 - [Dijkstra's algorithm — Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
