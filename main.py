@@ -1,16 +1,23 @@
+import sys
 from models import Start_hub, End_hub, Zone
 from parser import parse_file
 from dijkstra import Dijkstra
 from simulation import Simulation
 from graph import Graph
 from display import Display
-import sys
 
 
 def find_start_end(zones: dict[str, Zone]) -> tuple[str, str]:
+    """Find the names of the start and end zones.
+
+    Args:
+        zones: Dictionary of zones keyed by name.
+
+    Returns:
+        Tuple of (start_zone_name, end_zone_name).
+    """
     start = ""
     end = ""
-
     for zone in zones.values():
         if isinstance(zone, Start_hub):
             start = zone.name
@@ -20,6 +27,7 @@ def find_start_end(zones: dict[str, Zone]) -> tuple[str, str]:
 
 
 def main() -> None:
+    """Entry point — parse, simulate, and display the drone routing."""
     if len(sys.argv) < 2:
         raise SystemExit("ERROR: usage: python3 main.py <config_file>")
 
@@ -33,10 +41,13 @@ def main() -> None:
     sim.run()
 
     display = Display()
-    for turn in sim.output:
-        turn_list = turn.split()
-        colored_turn = display.format_turn(turn_list, graph)
-        print(" ".join(colored_turn))
+    display.print_path(path, graph)
+
+    for i, turn in enumerate(sim.output):
+        moves = turn.split()
+        display.print_turn(i + 1, moves, graph, end_zone)
+
+    display.print_summary(len(sim.output), nb_drones)
 
 
 if __name__ == "__main__":

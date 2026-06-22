@@ -10,8 +10,11 @@ class Display:
         "yellow": "\033[33m",
         "blue": "\033[34m",
         "gray": "\033[90m",
+        "cyan": "\033[36m",
         "reset": "\033[0m",
     }
+
+    SEPARATOR = "=" * 45
 
     def colorize(self, text: str, color: str | None) -> str:
         """Wrap text in ANSI color codes if the color is known.
@@ -28,25 +31,76 @@ class Display:
             return text
         return f"{self.COLORS[color]}{text}{self.COLORS['reset']}"
 
-    def format_turn(self, output: list[str], graph: Graph) -> list[str]:
-        """Colorize the zone names in a turn's movement list.
+    def colorize_zone(self, zone_name: str, graph: Graph) -> str:
+        """Return a zone name wrapped in its configured color.
 
         Args:
-            output: List of movement strings like "D1-roof1".
+            zone_name: The name of the zone to colorize.
             graph: The zone network graph, used to look up colors.
 
         Returns:
-            List of movement strings with colored zone names.
+            The colorized zone name, or plain text if no color.
         """
-        new_output: list[str] = []
+        if zone_name not in graph.zones:
+            return zone_name
+        color = graph.zones[zone_name].color
+        return self.colorize(zone_name, color)
 
-        for elem in output:
-            drone, rest = elem.split("-", 1)
-            if rest in graph.zones:
-                color = graph.zones[rest].color
-                colored = self.colorize(rest, color)
+    def print_path(self, path: list[str], graph: Graph) -> None:
+        """Print the computed path from start to end.
+
+        Args:
+            path: Ordered list of zone names from start to end.
+            graph: The zone network graph, used to look up colors.
+        """
+        colored = [self.colorize_zone(z, graph) for z in path]
+        print(f"\nPath: {' --> '.join(colored)}\n")
+
+    def print_turn(
+        self,
+        turn_number: int,
+        moves: list[str],
+        graph: Graph,
+        end_zone: str,
+    ) -> None:
+        """Print a single simulation turn with formatted movements.
+
+        Args:
+            turn_number: The current turn number.
+            moves: List of movement strings like "D1-roof1".
+            graph: The zone network graph, used to look up colors.
+            end_zone: Name of the end zone to detect deliveries.
+        """
+        print(self.SEPARATOR)
+        print(f"Turn {turn_number}")
+        print(self.SEPARATOR)
+
+        for move in moves:
+            drone, rest = move.split("-", 1)
+
+            if "-" in rest:
+                origin, destination = rest.split("-", 1)
+                c_origin = self.colorize_zone(origin, graph)
+                c_dest = self.colorize_zone(destination, graph)
+                print(
+                    f"  {drone}: {c_origin} ~~~~~~~~~~>"
+                    f" [{c_dest}]   (in transit)"
+                )
+            elif rest == end_zone:
+                colored = self.colorize_zone(rest, graph)
+                print(f"  {drone}: -----------> {colored}   [DELIVERED]")
             else:
-                colored = rest
-            new_output.append(f"{drone}-{colored}")
+                colored = self.colorize_zone(rest, graph)
+                print(f"  {drone}: -----------> {colored}")
 
-        return new_output
+    def print_summary(self, nb_turns: int, nb_drones: int) -> None:
+        """Print the simulation summary.
+
+        Args:
+            nb_turns: Total number of turns taken.
+            nb_drones: Total number of drones delivered.
+        """
+        print(f"\n{self.SEPARATOR}")
+        print(f"Simulation complete in {nb_turns} turns")
+        print(f"{nb_drones}/{nb_drones} drones delivered")
+        print(f"{self.SEPARATOR}\n")
