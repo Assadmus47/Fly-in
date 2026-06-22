@@ -187,6 +187,14 @@ Turn 7
 Simulation complete in 7 turns
 3/3 drones delivered
 =============================================
+
+D1-hub-roof1
+D1-roof1
+D1-goal D2-hub-roof1
+D2-roof1
+D2-goal D3-hub-roof1
+D3-roof1
+D3-goal
 ```
 
 Each line represents one simulation turn. Each entry follows the format:
